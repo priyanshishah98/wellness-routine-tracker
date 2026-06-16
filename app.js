@@ -343,17 +343,26 @@ function initSupabase() {
 function bindEvents() {
   $("emailAuthForm").addEventListener("submit", async (event) => {
     event.preventDefault();
+    setText("authMessage", "");
+    if (!$("emailAuthForm").reportValidity()) return;
+
     const result = await supabase.auth.signInWithPassword({
-      email: $("email").value,
+      email: $("email").value.trim(),
       password: $("password").value
     });
     if (result.error) setText("authMessage", result.error.message);
   });
 
   $("createAccountButton").addEventListener("click", async () => {
+    setText("authMessage", "");
+    if (!$("emailAuthForm").reportValidity()) return;
+
     const result = await supabase.auth.signUp({
-      email: $("email").value,
-      password: $("password").value
+      email: $("email").value.trim(),
+      password: $("password").value,
+      options: {
+        emailRedirectTo: window.location.href
+      }
     });
     setText("authMessage", result.error ? result.error.message : "Account created. Check your email if confirmation is enabled.");
   });
