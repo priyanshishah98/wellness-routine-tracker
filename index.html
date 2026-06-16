@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Glow-Up Pal</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">My Glow-Up Pal</p>
+        <h1>Two-person glow-up tracking without the spreadsheet mess.</h1>
+        <p class="subhead">Plan the day, log meals and workouts, and compare progress with one friend through private Supabase-backed accounts.</p>
+        <div class="hero-metrics" aria-label="Goal summary">
+          <span><strong>82 kg</strong> start</span>
+          <span><strong>62 kg</strong> goal</span>
+          <span><strong>2</strong> friends</span>
+        </div>
+      </div>
+      <aside class="status-card">
+        <span>Today</span>
+        <strong id="todayLabel">Today</strong>
+        <p id="authStatus">Not signed in</p>
+        <button id="signOutButton" class="secondary hidden" type="button">Sign out</button>
+      </aside>
+    </section>
+
+    <section id="setupWarning" class="section warning hidden">
+      <h2>Supabase setup required</h2>
+      <p>Add your Supabase project URL and anon key in <code>supabase-config.js</code>, then run <code>supabase-schema.sql</code> in the Supabase SQL editor.</p>
+    </section>
+
+    <section id="authPanel" class="section auth-section">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Private access</p>
+          <h2>Sign in with email</h2>
+        </div>
+      </div>
+      <div class="auth-layout">
+        <form id="emailAuthForm" class="card auth-card">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="email" required>
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" minlength="6" required>
+          <div class="button-row">
+            <button id="signInEmailButton" type="submit">Sign in</button>
+            <button id="createAccountButton" class="secondary" type="button">Create account</button>
+          </div>
+        </form>
+        <article class="card trust-card">
+          <p class="kicker">What is shared</p>
+          <h3>Only between linked friends</h3>
+          <p>Your friend can see your daily logs after you exchange friend codes. Everyone else is blocked by Supabase row-level security.</p>
+          <div class="mini-steps">
+            <span>1. Create account</span>
+            <span>2. Copy friend code</span>
+            <span>3. Log the day</span>
+          </div>
+        </article>
+      </div>
+      <p id="authMessage" class="message"></p>
+    </section>
+
+    <section id="appPanel" class="hidden">
+      <section class="section control-section">
+        <div class="section-head">
+          <div>
+            <p class="kicker">Account</p>
+            <h2>Profile and friend link</h2>
+          </div>
+          <button id="copyCodeButton" class="secondary" type="button">Copy my code</button>
+        </div>
+        <div class="profile-grid">
+          <form id="profileForm" class="card">
+            <label for="displayName">Display name</label>
+            <input id="displayName" type="text" placeholder="Priyanshi">
+            <label for="goalWeight">Goal weight kg</label>
+            <input id="goalWeight" type="number" step="0.1" min="40" max="140" value="62">
+            <button type="submit">Save profile</button>
+          </form>
+          <form id="friendForm" class="card">
+            <h3>Your friend code</h3>
+            <p id="myFriendCode" class="code">Loading...</p>
+            <label for="friendCodeInput">Friend code</label>
+            <input id="friendCodeInput" type="text" placeholder="Paste your friend's code">
+            <button type="submit">Add friend</button>
+            <p id="friendMessage" class="message"></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="section routine-section">
+        <div class="section-head">
+          <div>
+            <p class="kicker">Today’s plan</p>
+            <h2>Shared routine</h2>
+          </div>
+        </div>
+        <div class="routine-grid">
+          <article class="card">
+            <h3 id="workoutTitle">Workout</h3>
+            <ul id="workoutList"></ul>
+          </article>
+          <article class="card">
+            <h3>Jain-friendly meals</h3>
+            <ul id="mealList"></ul>
+          </article>
+          <article class="card accent">
+            <h3>Daily target</h3>
+            <p id="dailyTarget"></p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <p class="kicker">Daily check-in</p>
+            <h2>Log today</h2>
+          </div>
+        </div>
+        <form id="dailyLogForm" class="log-form">
+          <div>
+            <label for="logWeight">Weight kg</label>
+            <input id="logWeight" type="number" step="0.1" min="40" max="140">
+          </div>
+          <div>
+            <label for="workoutStatus">Workout</label>
+            <select id="workoutStatus">
+              <option>Planned</option>
+              <option>Completed</option>
+              <option>Partial</option>
+              <option>Rest day</option>
+            </select>
+          </div>
+          <div>
+            <label for="mealStatus">Meals</label>
+            <select id="mealStatus">
+              <option>Followed plan</option>
+              <option>Mostly followed</option>
+              <option>Adjusted</option>
+              <option>Skipped tracking</option>
+            </select>
+          </div>
+          <div>
+            <label for="waterIntake">Water</label>
+            <select id="waterIntake">
+              <option>Under 1.5L</option>
+              <option>1.5-2L</option>
+              <option selected>2-2.5L</option>
+              <option>2.5L+</option>
+            </select>
+          </div>
+          <div>
+            <label for="energy">Energy</label>
+            <select id="energy">
+              <option>Low</option>
+              <option selected>Steady</option>
+              <option>Good</option>
+              <option>High</option>
+            </select>
+          </div>
+          <div>
+            <label for="mood">Mood</label>
+            <select id="mood">
+              <option>Gentle</option>
+              <option selected>Focused</option>
+              <option>Happy</option>
+              <option>Tired</option>
+            </select>
+          </div>
+          <div class="wide">
+            <label for="notes">Notes</label>
+            <textarea id="notes" placeholder="What worked? What needs changing?"></textarea>
+          </div>
+          <button type="submit">Save today’s log</button>
+        </form>
+        <p id="logMessage" class="message"></p>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <p class="kicker">Shared progress</p>
+            <h2>Dashboard</h2>
+          </div>
+          <button id="exportCsvButton" class="secondary" type="button">Export my CSV</button>
+        </div>
+        <div class="progress-grid">
+          <article class="card">
+            <h3>Your latest</h3>
+            <div id="myProgress" class="progress-block">No logs yet.</div>
+          </article>
+          <article class="card">
+            <h3>Friend latest</h3>
+            <div id="friendProgress" class="progress-block">Add a friend to compare.</div>
+          </article>
+        </div>
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Person</th>
+              <th>Weight</th>
+              <th>Workout</th>
+              <th>Meals</th>
+              <th>Water</th>
+              <th>Energy</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="historyRows"></tbody>
+        </table>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
